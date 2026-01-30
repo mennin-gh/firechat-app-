@@ -31,7 +31,7 @@ const SignupForm: React.FC < SignupFormProps > = ({ onSuccess, onSwitchToLogin }
     setLoading(true);
     
     try {
-      await AuthService.signUpWithEmail(email, password, displayName);
+      await AuthService.signupWithEmail(email, password, displayName);
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
