@@ -1,4 +1,4 @@
-import { 
+import {
   collection,
   doc,
   setDoc,
@@ -46,7 +46,7 @@ export interface UserConversation {
 }
 
 export const conversationService = {
-  // === USES: setDoc, getDoc, writeBatch, serverTimestamp, arrayUnion ===
+  // Create a direct conversation between two users
   async createDirectConversation(user1Id: string, user2Id: string): Promise<string> {
     const participants = [user1Id, user2Id].sort();
     const conversationId = `direct_${participants.join('_')}`;
@@ -85,11 +85,11 @@ export const conversationService = {
     
     return conversationId;
   },
-
-  // === USES: collection, setDoc, writeBatch, serverTimestamp ===
+  
+  // Create a group conversation
   async createGroupConversation(
-    creatorId: string, 
-    participantIds: string[], 
+    creatorId: string,
+    participantIds: string[],
     name: string,
     description?: string,
     photoURL?: string
@@ -129,8 +129,8 @@ export const conversationService = {
     await batch.commit();
     return conversationId;
   },
-
-  // === USES: getDocs, query, orderBy, collection ===
+  
+  // Get user's conversations
   async getUserConversations(userId: string): Promise<(Conversation & UserConversation)[]> {
     const userConvsRef = collection(db, 'users', userId, 'conversations');
     const q = query(userConvsRef, orderBy('updatedAt', 'desc'));
@@ -154,8 +154,8 @@ export const conversationService = {
     
     return conversations.filter(Boolean) as (Conversation & UserConversation)[];
   },
-
-  // === USES: onSnapshot, query, orderBy, collection ===
+  
+  // Listen to user's conversations in real-time
   onUserConversationsChange(userId: string, callback: (conversations: (Conversation & UserConversation)[]) => void) {
     const userConvsRef = collection(db, 'users', userId, 'conversations');
     const q = query(userConvsRef, orderBy('updatedAt', 'desc'));
@@ -180,11 +180,11 @@ export const conversationService = {
       callback(conversations.filter(Boolean) as (Conversation & UserConversation)[]);
     });
   },
-
-  // === USES: updateDoc, serverTimestamp ===
+  
+  // Update user conversation settings
   async updateUserConversation(
-    userId: string, 
-    conversationId: string, 
+    userId: string,
+    conversationId: string,
     updates: Partial<UserConversation>
   ) {
     const userConvRef = doc(db, 'users', userId, 'conversations', conversationId);
@@ -193,8 +193,8 @@ export const conversationService = {
       updatedAt: serverTimestamp()
     });
   },
-
-  // === USES: getDoc, updateDoc, arrayUnion, setDoc, serverTimestamp, collection, doc ===
+  
+  // Add participant to group
   async addParticipant(conversationId: string, userId: string, addedBy: string) {
     const convRef = doc(db, 'conversations', conversationId);
     const convDoc = await getDoc(convRef);
@@ -233,7 +233,7 @@ export const conversationService = {
     }
   },
 
-  // === NEW: USES arrayRemove ===
+  // === NEW: Remove participant from group (uses arrayRemove) ===
   async removeParticipant(conversationId: string, userId: string, removedBy: string) {
     const convRef = doc(db, 'conversations', conversationId);
     const convDoc = await getDoc(convRef);
@@ -257,8 +257,7 @@ export const conversationService = {
           systemType: 'member_removed'
         });
         
-        // Note: We keep the userConversation document for history
-        // but mark it as archived
+        // Archive the user's conversation instead of deleting
         const userConvRef = doc(db, 'users', userId, 'conversations', conversationId);
         await updateDoc(userConvRef, {
           archived: true,
@@ -268,9 +267,8 @@ export const conversationService = {
     }
   },
 
-  // === NEW: USES where and limit ===
+  // === NEW: Search conversations by name/description (uses where and limit) ===
   async searchConversations(userId: string, searchTerm: string, maxResults: number = 10): Promise<(Conversation & UserConversation)[]> {
-    // Get user's conversations first
     const userConvsRef = collection(db, 'users', userId, 'conversations');
     const q = query(userConvsRef, limit(maxResults));
     const snapshot = await getDocs(q);
@@ -284,7 +282,7 @@ export const conversationService = {
         if (convDoc.exists()) {
           const conversation = convDoc.data() as Conversation;
           
-          // Search in conversation name or participants
+          // Filter by search term in name or description
           const matchesSearch = 
             conversation.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             conversation.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -303,7 +301,7 @@ export const conversationService = {
     return conversations.filter(Boolean) as (Conversation & UserConversation)[];
   },
 
-  // === NEW: USES where for filtering ===
+  // === NEW: Get only group conversations (uses where for filtering) ===
   async getGroupConversations(userId: string): Promise<Conversation[]> {
     const userConvsRef = collection(db, 'users', userId, 'conversations');
     const snapshot = await getDocs(userConvsRef);
@@ -327,7 +325,7 @@ export const conversationService = {
     return conversations.filter(Boolean) as Conversation[];
   },
 
-  // === NEW: USES limit for pagination ===
+  // === NEW: Get recent conversations with limit (uses limit) ===
   async getRecentConversations(userId: string, count: number = 5): Promise<(Conversation & UserConversation)[]> {
     const userConvsRef = collection(db, 'users', userId, 'conversations');
     const q = query(
@@ -355,5 +353,26 @@ export const conversationService = {
     );
     
     return conversations.filter(Boolean) as (Conversation & UserConversation)[];
+  },
+
+  // === NEW: Search for conversations where user is a participant (uses where) ===
+  async findConversationWithUser(currentUserId: string, otherUserId: string): Promise<string | null> {
+    const userConvsRef = collection(db, 'users', currentUserId, 'conversations');
+    const snapshot = await getDocs(userConvsRef);
+    
+    for (const userConvDoc of snapshot.docs) {
+      const userConv = userConvDoc.data() as UserConversation;
+      const convRef = doc(db, 'conversations', userConv.conversationId);
+      const convDoc = await getDoc(convRef);
+      
+      if (convDoc.exists()) {
+        const conversation = convDoc.data() as Conversation;
+        if (conversation.type === 'direct' && conversation.participants.includes(otherUserId)) {
+          return conversation.id;
+        }
+      }
+    }
+    
+    return null;
   }
 };
