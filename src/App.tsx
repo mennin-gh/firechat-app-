@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './lib/firebase/config';
 import AuthModal from './components/auth/AuthModal';
+import MainChat from './components/layout/MainChat';
 import './App.css';
 
 function App() {
@@ -26,7 +27,13 @@ function App() {
   };
   
   if (loading) {
-    return <div className="loading">Loading FireChat...</div>;
+    return (
+      <div className="app-loading">
+        <div className="loading-spinner-large"></div>
+        <h2>FireChat Pro</h2>
+        <p>Loading your chat experience...</p>
+      </div>
+    );
   }
   
   return (
@@ -37,57 +44,73 @@ function App() {
         onAuthSuccess={() => setShowAuthModal(false)}
       />
 
-      <header className="header">
-        <h1>🔥 FireChat Pro</h1>
-        <p>Real-time chat application</p>
-      </header>
-
-      <main className="main">
-        {user ? (
-          <div className="dashboard">
-            <div className="user-info">
-              {user.photoURL && (
-                <img
-                  src={user.photoURL}
-                  alt={user.displayName || 'User'}
-                  className="user-avatar"
-                />
-              )}
-              <div>
-                <h2>Welcome, {user.displayName || user.email}!</h2>
-                <p className="user-email">{user.email}</p>
+      <header className="app-header">
+        <div className="header-content">
+          <div className="brand">
+            <h1>🔥 FireChat Pro</h1>
+            <p className="tagline">Real-time messaging perfected</p>
+          </div>
+          
+          {user && (
+            <div className="user-menu">
+              <div className="user-greeting">
+                <span>Hello, {user.displayName?.split(' ')[0] || 'User'}</span>
               </div>
-            </div>
-            <p className="dashboard-text">You are now ready to start chatting.</p>
-            <div className="dashboard-actions">
-              <button onClick={() => alert('Chat interface coming next!')}>
-                Open Chat
-              </button>
-              <button onClick={handleLogout} className="btn-logout">
+              <button 
+                onClick={handleLogout}
+                className="logout-btn"
+                title="Sign out"
+              >
                 Sign Out
               </button>
             </div>
+          )}
+        </div>
+      </header>
+
+      <main className="app-main">
+        {user ? (
+          <div className="chat-wrapper">
+            <MainChat />
           </div>
         ) : (
-          <div className="auth-section">
-            <h2>Connect & Converse</h2>
-            <p>Sign in to start real-time messaging with anyone, anywhere.</p>
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="btn-auth-primary"
-            >
-              Get Started
-            </button>
+          <div className="hero-section">
+            <div className="hero-content">
+              <div className="hero-icon">💬</div>
+              <h2>Connect instantly with anyone</h2>
+              <p className="hero-description">
+                FireChat Pro brings people together with seamless real-time messaging, 
+                voice calls, and file sharing—all wrapped in a beautiful interface.
+              </p>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="hero-cta"
+              >
+                Start Messaging Now
+              </button>
+              
+              <div className="hero-features">
+                <div className="feature">
+                  <span className="feature-icon">⚡</span>
+                  <span>Real-time messaging</span>
+                </div>
+                <div className="feature">
+                  <span className="feature-icon">🎯</span>
+                  <span>Voice & video calls</span>
+                </div>
+                <div className="feature">
+                  <span className="feature-icon">🔒</span>
+                  <span>End-to-end secure</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
-
-        <div className="status">
-          <p>✅ Firebase is connected</p>
-          <p>✅ React is running</p>
-          <p>✅ Auth System Ready</p>
-          <p>🚀 Next: Chat Interface</p>
-        </div>
       </main>
+
+      <footer className="app-footer">
+        <p>FireChat Pro © 2024 • Built with React & Firebase</p>
+      </footer>
     </div>
   );
 }
