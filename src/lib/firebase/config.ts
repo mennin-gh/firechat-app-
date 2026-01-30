@@ -1,3 +1,5 @@
+import { getAuth } from 'firebase/auth';
+// ... your existing firebaseConfig and app initia
 export const firebaseConfig = {
   apiKey: "AIzaSyDk2162LJTRPRKtNPjwK1wdIuXGXG6JScA",
   authDomain: "firechat-pro-52ed5.firebaseapp.com",
@@ -6,3 +8,7 @@ export const firebaseConfig = {
   messagingSenderId: "828493856491",
   appId: "1:828493856491:web:8e4fb3346512d9179988ae"
 };
+
+
+export const auth = getAuth(app);
+// Keep your existing export for firebaseConfig
