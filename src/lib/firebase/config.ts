@@ -23,5 +23,4 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Export the config for use in other services if needed
-export { firebaseConfig };
 export default app;
