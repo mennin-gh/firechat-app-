@@ -1,42 +1,91 @@
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  FacebookAuthProvider,
+  TwitterAuthProvider,
   signOut,
   updateProfile,
-  User,
   UserCredential
 } from 'firebase/auth';
-import { auth } from './config'; // You'll need to export `auth` from config.ts
+import { auth } from './config';
+import { userService } from './users';
 
 const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+const twitterProvider = new TwitterAuthProvider();
 
-export const authService = {
-  // Email/Password Sign Up
-  async signUpWithEmail(email: string, password: string, displayName: string): Promise < UserCredential > {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, { displayName });
+// Helper function to update Firestore user profile
+const updateFirestoreUser = async (userCredential: UserCredential, displayName ? : string) => {
+  const { user } = userCredential;
+  
+  await userService.createOrUpdateUser(user.uid, {
+    uid: user.uid,
+    email: user.email || '',
+    displayName: displayName || user.displayName || user.email?.split('@')[0] || 'User',
+    photoURL: user.photoURL || undefined,
+    status: 'online',
+    lastSeen: new Date() // Will be converted to Firestore timestamp in service
+  });
+  
+  return userCredential;
+};
+
+export const AuthService = {
+  // Email/Password Auth
+  loginWithEmail: async (email: string, password: string) => {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    await updateFirestoreUser(userCredential);
     return userCredential;
   },
   
-  // Email/Password Login
-  loginWithEmail(email: string, password: string): Promise < UserCredential > {
-    return signInWithEmailAndPassword(auth, email, password);
+  signupWithEmail: async (email: string, password: string, displayName: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+    // Update Firebase auth profile
+    await updateProfile(userCredential.user, { displayName });
+    
+    // Update Firestore user profile
+    await updateFirestoreUser(userCredential, displayName);
+    
+    return userCredential;
   },
   
-  // Google Sign-In
-  loginWithGoogle(): Promise < UserCredential > {
-    return signInWithPopup(auth, googleProvider);
+  // Social Logins
+  loginWithGoogle: async () => {
+    const userCredential = await signInWithPopup(auth, googleProvider);
+    await updateFirestoreUser(userCredential);
+    return userCredential;
   },
   
-  // Logout
-  logout(): Promise < void > {
-    return signOut(auth);
+  loginWithFacebook: async () => {
+    const userCredential = await signInWithPopup(auth, facebookProvider);
+    await updateFirestoreUser(userCredential);
+    return userCredential;
   },
   
-  // Get current user
-  getCurrentUser(): User | null {
-    return auth.currentUser;
+  loginWithTwitter: async () => {
+    const userCredential = await signInWithPopup(auth, twitterProvider);
+    await updateFirestoreUser(userCredential);
+    return userCredential;
+  },
+  
+  // Account Management
+  logout: async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await userService.updateUserStatus(currentUser.uid, 'offline');
+    }
+    await signOut(auth);
+  },
+  
+  updateUserProfile: async (updates: { displayName ? : string;photoURL ? : string }) => {
+    if (!auth.currentUser) throw new Error('No user logged in');
+    
+    await updateProfile(auth.currentUser, updates);
+    
+    // Also update Firestore
+    await userService.createOrUpdateUser(auth.currentUser.uid, updates);
   }
 };
