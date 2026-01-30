@@ -7,8 +7,7 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
-  Timestamp,
-  DocumentData
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '../lib/firebase/config';
 
