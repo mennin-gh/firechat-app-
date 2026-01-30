@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireChat - Step 1</title>
+    <script src="/firebase-config.js"></script>
+    <!-- Load Firebase SDKs from CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: #0f172a; color: #f1f5f9; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { background: #1e293b; padding: 2rem; border-radius: 1rem; max-width: 400px; width: 90%; text-align: center; }
+        h1 { color: #60a5fa; margin-bottom: 1rem; }
+        button { background: #3b82f6; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 0.5rem; font-size: 1rem; margin: 0.5rem; cursor: pointer; width: 100%; }
+        #status { margin: 1rem 0; padding: 1rem; background: #334155; border-radius: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FireChat</h1>
+        <p>Step 1: Core Setup Complete.</p>
+        <div id="status">Checking Firebase Connection...</div>
+        <button onclick="testFirebase()">Test Firebase Connection</button>
+        <button onclick="loginTest()">Simulate Login</button>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Simple test function
+        window.testFirebase = function() {
+            document.getElementById('status').innerHTML = '✅ Firebase Initialized!<br>Auth & Firestore are ready.';
+        };
+
+        window.loginTest = function() {
+            document.getElementById('status').innerHTML = '🔄 Login simulation active...<br>Ready for next step.';
+        };
+    </script>
+</body>
+</html>
