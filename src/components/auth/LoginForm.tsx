@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authService } from '../../lib/firebase/auth';
+import { AuthService } from '../../lib/firebase/auth';
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -18,7 +18,7 @@ const LoginForm: React.FC < LoginFormProps > = ({ onSuccess, onSwitchToSignup })
     setLoading(true);
     
     try {
-      await authService.loginWithEmail(email, password);
+      await AuthService.loginWithEmail(email, password);
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
@@ -29,7 +29,7 @@ const LoginForm: React.FC < LoginFormProps > = ({ onSuccess, onSwitchToSignup })
   
   const handleGoogleLogin = async () => {
     try {
-      await authService.loginWithGoogle();
+      await AuthService.loginWithGoogle();
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed');

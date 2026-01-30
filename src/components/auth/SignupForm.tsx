@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authService } from '../../lib/firebase/auth';
+import { AuthService } from '../../lib/firebase/auth';
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -31,7 +31,7 @@ const SignupForm: React.FC < SignupFormProps > = ({ onSuccess, onSwitchToLogin }
     setLoading(true);
     
     try {
-      await authService.signUpWithEmail(email, password, displayName);
+      await AuthService.signUpWithEmail(email, password, displayName);
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
@@ -42,7 +42,7 @@ const SignupForm: React.FC < SignupFormProps > = ({ onSuccess, onSwitchToLogin }
   
   const handleGoogleSignup = async () => {
     try {
-      await authService.loginWithGoogle();
+      await AuthService.loginWithGoogle();
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Google sign-up failed');
