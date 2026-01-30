@@ -1,5 +1,9 @@
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-// ... your existing firebaseConfig and app initia
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+
+// REPLACE THESE VALUES WITH YOUR ACTUAL FIREBASE CONFIG FROM STEP 2
 export const firebaseConfig = {
   apiKey: "AIzaSyDk2162LJTRPRKtNPjwK1wdIuXGXG6JScA",
   authDomain: "firechat-pro-52ed5.firebaseapp.com",
@@ -10,5 +14,14 @@ export const firebaseConfig = {
 };
 
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Export initialized services
 export const auth = getAuth(app);
-// Keep your existing export for firebaseConfig
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+// Export the config for use in other services if needed
+export { firebaseConfig };
+export default app;
