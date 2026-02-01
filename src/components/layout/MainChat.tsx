@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import RealConversationSidebar from './ConversationSidebar';
+import RealConversationSidebar from './RealConversationSidebar';
 import ChatRoom from '../chat/ChatRoom';
 
 // Mock data for development
@@ -44,7 +44,7 @@ const MainChat: React.FC = () => {
   return (
     <div className="main-chat-container">
       <div className={`chat-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <ConversationSidebar
+        <RealConversationSidebar
           conversations={mockConversations}
           selectedId={selectedConversation}
           onSelectConversation={handleSelectConversation}
