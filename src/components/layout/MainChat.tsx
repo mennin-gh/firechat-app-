@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ConversationSidebar from './ConversationSidebar';
+import RealConversationSidebar from './ConversationSidebar';
 import ChatRoom from '../chat/ChatRoom';
 
 // Mock data for development
