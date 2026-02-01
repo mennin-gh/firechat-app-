@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import RealConversationSidebar from './RealConversationSidebar';
 import ChatRoom from '../chat/ChatRoom';
-import './MainChat.css';
 
 interface MainChatProps {
   onNewConversation: () => void;
